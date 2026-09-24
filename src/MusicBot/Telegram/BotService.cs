@@ -61,6 +61,12 @@ public sealed class BotService : BackgroundService
             "Альбомы: отправка {Mode}, треков подряд {Parallel}, ждать пира до {Stall}с",
             _config.Albums.PackageAs, _config.Albums.ParallelTracks, _config.Downloads.StallTimeoutSeconds);
 
+        // И настройки диска: лимит уборки и сколько файлов держим для шары.
+        _logger.LogInformation(
+            "Диск: лимит папки загрузок {Limit}, хранить минимум {Keep} файлов, проверка раз в {Interval} мин",
+            _config.Downloads.MaxDiskUsageGb > 0 ? $"{_config.Downloads.MaxDiskUsageGb} ГБ" : "выключена",
+            _config.Downloads.MinFilesToKeep, _config.Downloads.CleanupIntervalMinutes);
+
         if (_config.Telegram.AdminUserId == 0)
             _logger.LogWarning("AdminUserId = 0: бот отвечает ЛЮБОМУ пользователю. Выставь свой id командой /id.");
 

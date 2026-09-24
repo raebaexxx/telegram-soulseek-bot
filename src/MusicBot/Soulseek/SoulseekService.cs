@@ -219,6 +219,18 @@ public sealed class SoulseekService : IAsyncDisposable
         return new SearchResults(tracks, albums, search.ResponseCount);
     }
 
+    /// <summary>Пересчитывает шару и сообщает серверу Soulseek актуальные цифры.</summary>
+    public async Task AnnounceShareAsync(CancellationToken ct)
+    {
+        if (!IsConnected)
+            return;
+
+        _shares.InvalidateCache();
+        var (dirs, files) = _shares.GetShareStats();
+        await _client.SetSharedCountsAsync(dirs, files, cancellationToken: ct);
+        _logger.LogInformation("Шара обновлена: {Dirs} папок / {Files} файлов", dirs, files);
+    }
+
     /// <summary>
     /// Скачивает файл. Если выбранный пир не отвечает или отваливается —
     /// автоматически пробует запасных пиров с тем же треком.

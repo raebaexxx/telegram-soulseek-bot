@@ -19,6 +19,7 @@ public sealed class UpdateHandler
     private readonly BotConfig _config;
     private readonly SoulseekService _soulseek;
     private readonly DownloadQueue _queue;
+    private readonly StorageCleaner _cleaner;
     private readonly ShareService _shares;
     private readonly ILogger<UpdateHandler> _logger;
 
@@ -35,12 +36,14 @@ public sealed class UpdateHandler
         BotConfig config,
         SoulseekService soulseek,
         DownloadQueue queue,
+        StorageCleaner cleaner,
         ShareService shares,
         ILogger<UpdateHandler> logger)
     {
         _config = config;
         _soulseek = soulseek;
         _queue = queue;
+        _cleaner = cleaner;
         _shares = shares;
         _logger = logger;
     }
@@ -118,7 +121,8 @@ public sealed class UpdateHandler
                     "Можно и явно: /search Daft Punk Around the World\n\n" +
                     "Команды:\n" +
                     "/cancel — отменить текущее скачивание\n" +
-                    "/status — состояние очереди\n" +
+                    "/status — состояние очереди и место на диске\n" +
+                    "/cleanup — подрезать папку загрузок до лимита\n" +
                     "/id — показать твой Telegram ID",
                     cancellationToken: ct);
                 break;
@@ -139,11 +143,39 @@ public sealed class UpdateHandler
             case "/status":
             {
                 var active = _queue.GetActive(UserKey(chatId));
+                var used = _cleaner.GetUsedBytes();
+                var limit = (long)_config.Downloads.MaxDiskUsageGb * 1024 * 1024 * 1024;
+                var disk = $"Занято в загрузках: {MessageViews.FormatBytes(used)}" +
+                           (limit > 0 ? $" из {MessageViews.FormatBytes(limit)}" : string.Empty);
+
                 var status = _queue.ActiveCount == 0
-                    ? "Очередь пуста, ничего не качается."
+                    ? $"Очередь пуста, ничего не качается.\n{disk}"
                     : $"Активных: {_queue.ActiveCount}, ждут: {_queue.WaitingCount}." +
-                      (active is { } job ? $"\nСейчас: {job.DisplayName}" : "");
+                      (active is { } job ? $"\nСейчас: {job.DisplayName}" : string.Empty) +
+                      $"\n{disk}";
                 await bot.SendMessage(chatId, status, cancellationToken: ct);
+                break;
+            }
+
+            case "/cleanup":
+            {
+                var limitText = MessageViews.FormatBytes((long)_config.Downloads.MaxDiskUsageGb * 1024 * 1024 * 1024);
+                var cleanup = _cleaner.Cleanup(force: true);
+
+                if (cleanup.DeletedFiles > 0)
+                {
+                    await _soulseek.AnnounceShareAsync(ct);
+                    await bot.SendMessage(chatId,
+                        $"🧹 Удалено файлов: {cleanup.DeletedFiles}, освобождено {MessageViews.FormatBytes(cleanup.FreedBytes)}.\n" +
+                        $"Осталось: {cleanup.RemainingFiles} (лимит {limitText}).",
+                        cancellationToken: ct);
+                }
+                else
+                {
+                    await bot.SendMessage(chatId,
+                        $"🧹 Убирать нечего: занято {MessageViews.FormatBytes(cleanup.TotalBytes)} при лимите {limitText}.",
+                        cancellationToken: ct);
+                }
                 break;
             }
 

@@ -68,6 +68,24 @@ public sealed class BotConfig
         /// переключится на другого. Помогает, когда пир за NAT не может до нас достучаться.
         /// </summary>
         public int StallTimeoutSeconds { get; init; } = 20;
+
+        /// <summary>
+        /// Предел объёма папки загрузок в ГБ. Когда превышен — бот удаляет самые старые файлы.
+        /// 0 = неограниченно (тогда диск рано или поздно кончится).
+        /// </summary>
+        public int MaxDiskUsageGb { get; init; } = 10;
+
+        /// <summary>
+        /// Сколько свежих файлов не трогать при уборке. Нужно, чтобы папка не опустела:
+        /// с пустой шарой сеть Soulseek считает бота «леечером» и режет скорость.
+        /// </summary>
+        public int MinFilesToKeep { get; init; } = 10;
+
+        /// <summary>Как часто проверять объём папки загрузок (минут).</summary>
+        public int CleanupIntervalMinutes { get; init; } = 10;
+
+        /// <summary>Файлы моложе этого возраста не удаляем (минут) — вдруг они ещё отправляются.</summary>
+        public int MinFileAgeMinutes { get; init; } = 15;
     }
 
     public sealed class AlbumOptions

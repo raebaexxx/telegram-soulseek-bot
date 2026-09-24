@@ -75,6 +75,10 @@ var config = new BotConfig
         MaxUploadSlots = builder.Configuration.GetValue("Downloads:MaxUploadSlots", 2),
         KeepDownloadedFiles = builder.Configuration.GetValue("Downloads:KeepDownloadedFiles", true),
         StallTimeoutSeconds = builder.Configuration.GetValue("Downloads:StallTimeoutSeconds", 20),
+        MaxDiskUsageGb = builder.Configuration.GetValue("Downloads:MaxDiskUsageGb", 10),
+        MinFilesToKeep = builder.Configuration.GetValue("Downloads:MinFilesToKeep", 10),
+        CleanupIntervalMinutes = builder.Configuration.GetValue("Downloads:CleanupIntervalMinutes", 10),
+        MinFileAgeMinutes = builder.Configuration.GetValue("Downloads:MinFileAgeMinutes", 15),
     },
     Albums = new BotConfig.AlbumOptions
     {
@@ -97,8 +101,10 @@ builder.Services.AddSingleton(config);
 builder.Services.AddSingleton<ShareService>();
 builder.Services.AddSingleton<SoulseekService>();
 builder.Services.AddSingleton<DownloadQueue>();
+builder.Services.AddSingleton<StorageCleaner>();
 builder.Services.AddSingleton<UpdateHandler>();
 builder.Services.AddHostedService<BotService>();
+builder.Services.AddHostedService<StorageCleanupService>();
 
 var host = builder.Build();
     await host.RunAsync();
