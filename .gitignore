@@ -1,0 +1,18 @@
+## .NET
+bin/
+logs/
+obj/
+*.user
+
+## Сборка
+dist/
+
+## Локальные настройки с секретами (НЕ коммитим!)
+src/MusicBot/appsettings.json
+src/MusicBot/appsettings.local.json
+src/MusicBot/appsettings.Development.json
+scripts/telegram-bot-api.env
+scripts/*.compiled.*
+
+## Скачанная музыка
+downloads/

@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DE775D38-0317-43BD-8699-7BD06E3E353F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicBot", "src\MusicBot\MusicBot.csproj", "{19CD067F-4B6A-4A90-97F9-7F2A6AE94883}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{19CD067F-4B6A-4A90-97F9-7F2A6AE94883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19CD067F-4B6A-4A90-97F9-7F2A6AE94883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19CD067F-4B6A-4A90-97F9-7F2A6AE94883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19CD067F-4B6A-4A90-97F9-7F2A6AE94883}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{19CD067F-4B6A-4A90-97F9-7F2A6AE94883} = {DE775D38-0317-43BD-8699-7BD06E3E353F}
+	EndGlobalSection
+EndGlobal
