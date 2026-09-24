@@ -194,6 +194,26 @@ cd ~/projects/musicbot
 Ключи можно передать и без файла:
 `TELEGRAM_API_ID=… TELEGRAM_API_HASH=… ./run.sh`
 
+Переменные окружения имеют приоритет над файлом — это удобно, например, в systemd-юните,
+где пути задаются через `Environment=`.
+
+### Если сервер не запускается: «CPU ISA level is lower than required»
+
+Ошибка означает, что бинарь собран под более новый процессор, чем на сервере: в ELF-метке
+указано `x86-64-v4` (AVX-512), которого на Xeon Broadwell и старше нет. Проверь:
+
+```bash
+readelf -n telegram-bot-api | grep "ISA needed"
+objdump -d telegram-bot-api | grep -c "%zmm"    # 0 — реальных AVX-512 инструкций нет
+```
+
+Если реальных инструкций нет, а метка осталась (так бывает у тулчейна Arch), метку можно
+снять, и бинарь будет работать на старых CPU:
+
+```bash
+objcopy --remove-section=.note.gnu.property telegram-bot-api telegram-bot-api-fixed
+```
+
 Локальный сервер лучше держать на 127.0.0.1 и не прображивать наружу.
 
 ## Сеть: почему важен шаринг

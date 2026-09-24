@@ -20,12 +20,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Подхватываем файл с ключами, если он есть (создавать нужно только один раз).
+# Подхватываем файл с ключами, если он есть.
+# Уже заданные переменные (например, из systemd) имеют приоритет — иначе путь
+# с одной машины утащил бы настройки на другую.
 if [[ -f "$SCRIPT_DIR/telegram-bot-api.env" ]]; then
-    set -a
-    # shellcheck disable=SC1091
-    source "$SCRIPT_DIR/telegram-bot-api.env"
-    set +a
+    while IFS='=' read -r env_key env_value; do
+        # Пропускаем комментарии, пустые строки и не-KEY=VALUE
+        [[ "$env_key" =~ ^[A-Z_][A-Z0-9_]*$ ]] || continue
+        [[ -n "${!env_key:-}" ]] && continue
+        export "$env_key=$env_value"
+    done < "$SCRIPT_DIR/telegram-bot-api.env"
 fi
 
 API_ID="${TELEGRAM_API_ID:-}"
@@ -43,14 +47,14 @@ if [[ -z "$API_ID" || -z "$API_HASH" ]]; then
   2. Tools → API development tools → создай приложение
   3. Скопируй api_id и api_hash
 
-Куда вписать — двумя способами:
+Куда вписать — любым из способов:
 
-  А) Создай файл scripts/telegram-bot-api.env с двумя строками:
+  А) Файл scripts/telegram-bot-api.env (создай из telegram-bot-api.env.example):
        TELEGRAM_API_ID=12345678
        TELEGRAM_API_HASH=0123456789abcdef0123456789abcdef
 
-  Б) Или передай при запуске:
-       TELEGRAM_API_ID=12345678 TELEGRAM_API_HASH=... ./scripts/run-telegram-bot-api.sh
+  Б) Переменные окружения (имеют приоритет над файлом):
+       TELEGRAM_API_ID=12345678 TELEGRAM_API_HASH=... ./run.sh
 EOF
     exit 1
 fi
